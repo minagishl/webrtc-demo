@@ -192,16 +192,30 @@ async function startQrScanner() {
 	qrReader.style.display = 'block';
 	qrResult.innerHTML = '';
 
-	// Creating an Html5-Qrcode instance
-	html5QrCode = new Html5Qrcode('qr-reader');
+	// Creating an Html5Qrcode instance
+	const html5QrCode = new Html5Qrcode('qr-reader');
 
-	await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-
-	// Camera Selection (Front Camera Priority)
+	// Camera selection (Rear camera preferred)
 	Html5Qrcode.getCameras()
 		.then((cameras) => {
 			if (cameras && cameras.length) {
-				let cameraId = cameras[0].id;
+				// Prioritize rear-facing cameras
+				let cameraId = null;
+				for (let camera of cameras) {
+					if (
+						camera.label.toLowerCase().includes('back') ||
+						camera.label.toLowerCase().includes('environment')
+					) {
+						cameraId = camera.id;
+						break;
+					}
+				}
+
+				// If no rear camera is found, use the first camera
+				if (!cameraId) {
+					cameraId = cameras[0].id;
+				}
+
 				// Start QR code scanning
 				html5QrCode
 					.start(
@@ -215,6 +229,7 @@ async function startQrScanner() {
 							console.log(`QR Code detected: ${qrCodeMessage}`);
 							qrResult.innerHTML = `QR Code Result: ${qrCodeMessage}`;
 							document.getElementById('remoteSDP').value = qrCodeMessage;
+
 							// Stop QR code scanning
 							html5QrCode
 								.stop()
