@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>WebRTC Demo</title>
+    <style>
+        .list {
+            padding-left: 2rem;
+            display: flex;
+            flex-direction: column;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>WebRTC Data Channel Demo</h1>
+
+    <script src="./main.js"></script>
+
+    <h2>Signaling</h2>
+    <p>Status: <input type="text" id="status" value="" readonly="readonly" /></p>
+
+    <h3>Generating SDP</h3>
+
+    <div class="list">
+        <span><strong>Step 1:</strong> In Browser 1, press <strong>"Start"</strong> to generate the SDP (offer).</span>
+    </div>
+
+    <button type="button" onclick="startPeerConnection()">Start</button>
+
+    <h3>Local SDP (Read-only)</h3>
+
+    <div class="list">
+        <span><strong>Step 2:</strong> Copy this SDP (offer) from Browser 1.</span>
+        <span><strong>Step 4:</strong> Copy this SDP (answer) generated in Browser 2.</span>
+    </div>
+
+    <textarea id="localSDP" cols="80" rows="5" readonly="readonly"></textarea>
+
+    <h3>Remote SDP (Set manually)</h3>
+
+    <div class="list">
+        <span><strong>Step 3:</strong> In Browser 2, paste the copied SDP (offer) from Browser 1 into the text area
+            below
+            and press <strong>"Set"</strong> to generate the response SDP (answer).</span>
+        <span><strong>Step 5:</strong> In Browser 1, paste the copied SDP (answer) from Browser 2 into the text area
+            below
+            and press <strong>"Set"</strong>.</span>
+    </div>
+
+    <textarea id="remoteSDP" cols="80" rows="5"></textarea>
+    <button type="button" onclick="setRemoteSdp();">Set</button>
+
+    <h2>Communication via Data Channel</h2>
+    <form action="javascript:sendMessage()">
+        <input type="text" id="message" size="30" value="" />
+        <input type="submit" value="Send" />
+    </form>
+    <textarea id="history" cols="80" rows="10" readonly="readonly"></textarea>
+
+</body>
+
+</html>
