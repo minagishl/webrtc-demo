@@ -204,7 +204,8 @@ async function startQrScanner() {
 				for (let camera of cameras) {
 					if (
 						camera.label.toLowerCase().includes('back') ||
-						camera.label.toLowerCase().includes('environment')
+						camera.label.toLowerCase().includes('environment') ||
+						camera.label.toLowerCase().includes('背面')
 					) {
 						cameraId = camera.id;
 						break;
@@ -242,7 +243,7 @@ async function startQrScanner() {
 								});
 						},
 						(errorMessage) => {
-							console.log(`QR Code no match: ${errorMessage}`);
+							// console.log(`QR Code no match: ${errorMessage}`);
 						}
 					)
 					.catch((err) => {
