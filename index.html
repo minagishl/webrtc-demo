@@ -19,6 +19,20 @@
 
     <script src="./main.js"></script>
 
+    <script>
+        function copyToClipboard(elementId) {
+            try {
+                var copyText = document.getElementById(elementId);
+                copyText.select();
+                copyText.setSelectionRange(0, 99999);
+                document.execCommand("copy");
+                alert("Copy Completed!");
+            } catch (err) {
+                alert("Failed to copy the text: " + err);
+            }
+        }
+    </script>
+
     <h2>Signaling</h2>
     <p>Status: <input type="text" id="status" value="" readonly="readonly" /></p>
 
@@ -38,6 +52,7 @@
     </div>
 
     <textarea id="localSDP" cols="80" rows="5" readonly="readonly"></textarea>
+    <button type="button" onclick="copyToClipboard('localSDP');">Copy</button>
 
     <h3>Remote SDP (Set manually)</h3>
 
