@@ -7,6 +7,13 @@ let dataChannelOptions = {
 let peerConnection;
 let dataChannel;
 
+// Instance for QR Code generation
+let localQRCodeInstance;
+
+// Instance for QR code scanning
+let html5QrCode;
+const qrCodeScanConfig = { fps: 10, qrbox: 250 };
+
 window.onload = function () {
 	document.getElementById('status').value = 'closed';
 };
@@ -21,6 +28,7 @@ function createPeerConnection() {
 		} else {
 			document.getElementById('localSDP').value = pc.localDescription.sdp;
 			document.getElementById('status').value = 'Vanilla ICE ready';
+			generateLocalQrCode(pc.localDescription.sdp);
 		}
 	};
 
@@ -91,6 +99,11 @@ function setupDataChannel(dc) {
 function setRemoteSdp() {
 	let sdptext = document.getElementById('remoteSDP').value;
 
+	if (!sdptext) {
+		alert('Remote SDP is empty.');
+		return;
+	}
+
 	if (peerConnection) {
 		let answer = new RTCSessionDescription({
 			type: 'answer',
@@ -147,4 +160,98 @@ function sendMessage() {
 	dataChannel.send(msg);
 
 	return true;
+}
+
+// QR Code Generation Function
+function generateLocalQrCode(sdp) {
+	// If there is an existing QR code, delete it
+	if (localQRCodeInstance) {
+		localQRCodeInstance.clear();
+	}
+
+	const element = document.getElementById('localQRCode');
+
+	if (!element) {
+		alert('QR Code element not found.');
+		return;
+	}
+
+	// Generate QR Code
+	localQRCodeInstance = new QRCode(element, {
+		text: sdp,
+		width: 256,
+		height: 256,
+	});
+}
+
+// QR Code Scanner Start Function
+async function startQrScanner() {
+	const qrReader = document.getElementById('qr-reader');
+	const qrResult = document.getElementById('qr-result');
+
+	qrReader.style.display = 'block';
+	qrResult.innerHTML = '';
+
+	// Creating an Html5-Qrcode instance
+	html5QrCode = new Html5Qrcode('qr-reader');
+
+	await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+
+	// Camera Selection (Front Camera Priority)
+	Html5Qrcode.getCameras()
+		.then((cameras) => {
+			if (cameras && cameras.length) {
+				let cameraId = cameras[0].id;
+				// Start QR code scanning
+				html5QrCode
+					.start(
+						cameraId,
+						{
+							fps: qrCodeScanConfig.fps,
+							qrbox: qrCodeScanConfig.qrbox,
+						},
+						(qrCodeMessage) => {
+							// Processing of successful scans
+							console.log(`QR Code detected: ${qrCodeMessage}`);
+							qrResult.innerHTML = `QR Code Result: ${qrCodeMessage}`;
+							document.getElementById('remoteSDP').value = qrCodeMessage;
+							// Stop QR code scanning
+							html5QrCode
+								.stop()
+								.then((ignore) => {
+									qrReader.style.display = 'none';
+									alert('Remote SDP has been set from QR Code.');
+								})
+								.catch((err) => {
+									console.error('Failed to stop QR scanner.', err);
+								});
+						},
+						(errorMessage) => {
+							console.log(`QR Code no match: ${errorMessage}`);
+						}
+					)
+					.catch((err) => {
+						console.error(`Unable to start QR scanner: ${err}`);
+					});
+			} else {
+				alert('No cameras found.');
+			}
+		})
+		.catch((err) => {
+			console.error(`Error getting cameras: ${err}`);
+			alert('Error accessing cameras.');
+		});
+}
+
+function stopQrScanner() {
+	if (html5QrCode) {
+		html5QrCode
+			.stop()
+			.then((ignore) => {
+				document.getElementById('qr-reader').style.display = 'none';
+			})
+			.catch((err) => {
+				console.error('Failed to stop QR scanner.', err);
+			});
+	}
 }

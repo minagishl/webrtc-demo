@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>WebRTC Demo</title>
+    <title>WebRTC Demo with QR Code</title>
     <style>
         .list {
             padding-left: 2rem;
@@ -11,11 +11,28 @@
             flex-direction: column;
             margin: 1rem 0;
         }
+
+        .qr-section {
+            margin: 1rem 0;
+        }
+
+        #qr-reader {
+            width: 300px;
+            margin-top: 1rem;
+        }
+
+        #qr-result {
+            margin-top: 1rem;
+            word-wrap: break-word;
+        }
     </style>
+    <!-- Load libraries, etc. -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 </head>
 
 <body>
-    <h1>WebRTC Data Channel Demo</h1>
+    <h1>WebRTC Data Channel Demo with QR Code</h1>
 
     <script src="./main.js"></script>
 
@@ -54,7 +71,13 @@
     <textarea id="localSDP" cols="80" rows="5" readonly="readonly"></textarea>
     <button type="button" onclick="copyToClipboard('localSDP');">Copy</button>
 
-    <h3>Remote SDP (Set manually)</h3>
+    <!-- QR code display area of local SDP -->
+    <div class="qr-section">
+        <h4>Local SDP QR Code</h4>
+        <div id="localQRCode"></div>
+    </div>
+
+    <h3>Remote SDP (Set manually or via QR Code)</h3>
 
     <div class="list">
         <span><strong>Step 3:</strong> In Browser 2, paste the copied SDP (offer) from Browser 1 into the text area
@@ -67,6 +90,15 @@
 
     <textarea id="remoteSDP" cols="80" rows="5"></textarea>
     <button type="button" onclick="setRemoteSdp();">Set</button>
+
+    <!-- Remote SDP QR code scanning area -->
+    <div class="qr-section">
+        <h4>Scan Remote SDP QR Code</h4>
+        <button type="button" onclick="startQrScanner()">Start QR Scanner</button>
+        <button type="button" onclick="stopQrScanner()">Stop QR Scanner</button>
+        <div id="qr-reader" style="display: none;"></div>
+        <div id="qr-result"></div>
+    </div>
 
     <h2>Communication via Data Channel</h2>
     <form action="javascript:sendMessage()">
